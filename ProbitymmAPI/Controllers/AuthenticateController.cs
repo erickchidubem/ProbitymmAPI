@@ -15,16 +15,6 @@ namespace ProbitymmAPI.Controllers
     {
         CommonUtilityClass cuc = new CommonUtilityClass();
  
-        // GET: api/Test
-         [HttpGet]
-        public IHttpActionResult New()
-        {
-            string[] n = { "value1", "value2" };
-            //return NotFound();
-
-            return Content(HttpStatusCode.NotFound, "Not Really found");
-        }
-
         [HttpGet]
         public IHttpActionResult GetBusinessInfo([FromUri]int businessid)
         {
@@ -32,6 +22,13 @@ namespace ProbitymmAPI.Controllers
             return Ok();
         }
 
+        #region LoginSection
+       /// <summary>
+       /// Tries to check if User is registered and returns the user information 
+       /// if credentials are valid
+       /// </summary>
+       /// <param name="loginData"></param>
+       /// <returns></returns>
         //Post API : Login Registered Users
         [HttpPost]
         public IHttpActionResult Login([FromBody]LoginData loginData)
@@ -74,7 +71,8 @@ namespace ProbitymmAPI.Controllers
                 return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, 1000, "Incorrect header specification"));
             }
         }
-
+       
+        #endregion
 
         //POST API : Register Business Account
         [HttpPost]
@@ -161,7 +159,7 @@ namespace ProbitymmAPI.Controllers
 
         //POST API : Register Business Staff
         [HttpPost]
-        public IHttpActionResult RegisterStaff([FromBody]UserData userData)
+        public IHttpActionResult RegisterEditStaff([FromBody]UserData userData)
         {
             var result = (Object)null;
             var ReturnedData = (Object)null;
@@ -172,28 +170,35 @@ namespace ProbitymmAPI.Controllers
                 if (apikey == CommonUtilityClass.apikey)
                 {
                     Authentication at = new Authentication();
-                    int i = at.RegisterBusinessStaff(userData);
-
-                    if (i == 4)
+                    if (userData.businessid > 0)
                     {
-                        result = cuc.GetJsonObject(ReturnedData, i, "Staff information successfully updated");
-                        return Ok(result);
+                        int i = at.RegisterBusinessStaff(userData);
+                        if (i == 5)
+                        {
+                            result = cuc.GetJsonObject(ReturnedData, i, "User phone number or email exists");
+                        }
+                        else if (i == 4)
+                        {
+                            result = cuc.GetJsonObject(ReturnedData, i, "Staff information successfully updated");
+                        }
+                        else if (i == 3)
+                        {
+                            result = cuc.GetJsonObject(ReturnedData, i, "Staff registration is successful");                            
+                        }
+                        else if (i == 2)
+                        {
+                            result = cuc.GetJsonObject(ReturnedData, i, "Phone number already exists");  
+                        }
+                        else if (i == 1)
+                        {
+                            result = cuc.GetJsonObject(ReturnedData, i, "email address already exists");   
+                        }
                     }
-                    else if (i == 3){
-                        result = cuc.GetJsonObject(ReturnedData, i, "Staff registration is successful");
-                        return Ok(result);                      
-                    }
-                    else if (i == 2)
+                    else
                     {
-                        result = cuc.GetJsonObject(ReturnedData, i, "Phone number already exists");
-                        return Ok(result);
+                        result = cuc.GetJsonObject(ReturnedData, 6, "you did not supply businessid");
                     }
-                    else if (i == 1)
-                    {
-                        result = cuc.GetJsonObject(ReturnedData, i, "email address already exists");
-                        return Ok(result);
-                    }
-                    return Ok();
+                    return Ok(result);
                 }
                 else
                 {
@@ -204,6 +209,38 @@ namespace ProbitymmAPI.Controllers
             {
                 return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, 1000, "Incorrect header specification"));
             }
+        }
+
+
+        [HttpGet]
+        public IHttpActionResult AllBusinessStaff([FromUri] int BusinessId)
+        {
+            var result = (Object)null;
+            var ReturnedData = (Object)null;
+            if (Request.Headers.Contains("API-KEY"))
+            {
+                string apikey = Request.Headers.GetValues("API-KEY").First();
+                if (apikey == CommonUtilityClass.apikey)
+                {
+                    Authentication at = new Authentication();
+                    result = cuc.GetJsonObject(at.AllBusinessStaffList(BusinessId), 1, "All Staff");
+                    return Ok(result);
+                }
+                else
+                {
+                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, 100, "Wrong API Key"));
+                }
+            }
+            else
+            {
+                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, 1000, "Incorrect header specification"));
+            }
+        }
+
+        [HttpPost]
+        public IHttpActionResult ModifyBusinessInformation([FromBody]BizRegModel brm)
+        {
+            return Ok();
         }
     }
 }

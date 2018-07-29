@@ -149,5 +149,55 @@ namespace ProbitymmAPI.Data
             }
             return returnResult;
         }
+
+        public List<UserData> AllBusinessStaffList(int businessid){
+            List<UserData> AllStaff = new List<UserData>();
+            using (SqlConnection conn = connect.getConnection())
+            {
+                
+                using (SqlCommand cmd = new SqlCommand("SelectBusinessStaff", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@businessid", businessid);
+                    try
+                    {
+                        UserData ud = new UserData();
+                        SqlDataReader reader = cmd.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                ud = new UserData
+                                {
+                                    businessid = Convert.ToInt32(reader["businessID"]),
+                                    UserID = Convert.ToInt32(reader["id"]),
+                                    email = reader["email"] is DBNull ? null : (String)reader["email"],
+                                    phone = reader["phoneNumber"] is DBNull ? null : (String)reader["phoneNumber"],
+                                    departmentID = Convert.ToInt32(reader["DepartmentID"]),
+                                    levelID = Convert.ToInt32(reader["levelID"]),
+                                    fullname = reader["fullname"] is DBNull ? null : (String)reader["fullname"],
+                                    active = Convert.ToInt32(reader["active"]),
+                                    lastUpdatePassword = Convert.ToDateTime(reader["lastUpdatePassword"]),
+                                    loggedIn = Convert.ToInt32(reader["loggedIn"]),
+
+                                };
+                                AllStaff.Add(ud);
+                            }
+                        }
+                        else
+                        {
+                            ud = null;
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        CommonUtilityClass.ExceptionLog(ex);
+                    }
+                }
+            }
+            return AllStaff;
+        }
+        
     }
 }

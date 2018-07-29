@@ -33,7 +33,6 @@ namespace ProbitymmAPI.Models
         public int loggedIn { get; set; }
     }
    
-
     public class BizRegModel
     {
         public string businessName { get; set; }
@@ -42,6 +41,7 @@ namespace ProbitymmAPI.Models
         public string email { get; set; }
         public string phone {get;set;}
         public string password { get; set; }
+        public string logoImage { get; set; }
     }
 
     public class ChangePassword
@@ -52,6 +52,6 @@ namespace ProbitymmAPI.Models
         public string NewPassword { get; set; }
     }
     
-
+    
 
 }
