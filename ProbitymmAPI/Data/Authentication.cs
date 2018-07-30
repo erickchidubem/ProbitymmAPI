@@ -38,8 +38,6 @@ namespace ProbitymmAPI.Data
                                        active = Convert.ToInt32(reader["active"]),
                                        lastUpdatePassword = Convert.ToDateTime(reader["lastUpdatePassword"]),
                                        loggedIn = Convert.ToInt32(reader["loggedIn"]),
-
-
                                 };
                             }
                         }
@@ -58,9 +56,9 @@ namespace ProbitymmAPI.Data
             return ud;
         }
 
-        public int RegisterBusiness(BizRegModel bzm)
+        public ReturnValues RegisterBusiness(BizRegModel bzm)
         {
-            int returnResult = 0;
+            ReturnValues rv = new ReturnValues();
             using (SqlConnection conn = connect.getConnection())
             { 
                 using (SqlCommand cmd = new SqlCommand("RegisterBusinessAccount", conn))//call Stored Procedure
@@ -74,23 +72,28 @@ namespace ProbitymmAPI.Data
                     cmd.Parameters.AddWithValue("@password", bzm.password);
                     cmd.Parameters.Add("@returnvalue", System.Data.SqlDbType.Int);
                     cmd.Parameters["@returnvalue"].Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@returnvalueString", System.Data.SqlDbType.VarChar,200);
+                    cmd.Parameters["@returnvalueString"].Direction = ParameterDirection.Output;
                     try
                     {
-                        cmd.ExecuteNonQuery();
-                        returnResult = Convert.ToInt32(cmd.Parameters["@returnvalue"].Value);
+                        cmd.ExecuteNonQuery();                        
+                        rv.StatusCode = Convert.ToInt32(cmd.Parameters["@returnvalue"].Value);
+                        rv.StatusMessage = Convert.ToString(cmd.Parameters["@returnvalueString"].Value);
                     }
                     catch (Exception ex)
                     {
                         CommonUtilityClass.ExceptionLog(ex);
+                        rv.StatusCode = 2000;
+                        rv.StatusMessage = "An Error Occured";
                     }
                 }
             }
-            return returnResult;
+            return rv;
         }
 
-        public int RegisterBusinessStaff(UserData usd)
+        public ReturnValues RegisterBusinessStaff(UserData usd)
         {
-            int returnResult = 0;
+            ReturnValues rv = new ReturnValues();
             using (SqlConnection conn = connect.getConnection())
             {
                 using (SqlCommand cmd = new SqlCommand("RegisterBusinessStaff", conn))//call Stored Procedure
@@ -103,27 +106,32 @@ namespace ProbitymmAPI.Data
                     cmd.Parameters.AddWithValue("@phone", usd.phone);
                     cmd.Parameters.AddWithValue("@departmentID", usd.departmentID);
                     cmd.Parameters.AddWithValue("@levelId", usd.levelID);
-                    cmd.Parameters.AddWithValue("@password", usd.password);  
+                    cmd.Parameters.AddWithValue("@password", usd.password);
 
-                    cmd.Parameters.Add("@returnvalue", System.Data.SqlDbType.Int);
+                    cmd.Parameters.Add("@returnvalue", SqlDbType.Int);
                     cmd.Parameters["@returnvalue"].Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@returnvalueString", System.Data.SqlDbType.VarChar,200);
+                    cmd.Parameters["@returnvalueString"].Direction = ParameterDirection.Output;
                     try
                     {
                         cmd.ExecuteNonQuery();
-                        returnResult = Convert.ToInt32(cmd.Parameters["@returnvalue"].Value);
+                        rv.StatusCode = Convert.ToInt32(cmd.Parameters["@returnvalue"].Value);
+                        rv.StatusMessage = Convert.ToString(cmd.Parameters["@returnvalueString"].Value);
                     }
                     catch (Exception ex)
                     {
                         CommonUtilityClass.ExceptionLog(ex);
+                        rv.StatusCode = 2000;
+                        rv.StatusMessage = "An Error Occured";
                     }
                 }
             }
-            return returnResult;
+            return rv;
         }
 
-        public int ChangePassword(ChangePassword cp)
+        public ReturnValues ChangePassword(ChangePassword cp)
         {
-            int returnResult = 0;
+            ReturnValues rv = new ReturnValues();
             using (SqlConnection conn = connect.getConnection())
             {
                 using (SqlCommand cmd = new SqlCommand("ChangePassword", conn))//call Stored Procedure
@@ -133,13 +141,66 @@ namespace ProbitymmAPI.Data
                     cmd.Parameters.AddWithValue("@userid", cp.UserID);
                     cmd.Parameters.AddWithValue("@oldpass", cp.OldPassword);
                     cmd.Parameters.AddWithValue("@newpass", cp.NewPassword);
-                    
-                    cmd.Parameters.Add("@returnvalue", System.Data.SqlDbType.Int);
+
+                    cmd.Parameters.Add("@returnvalue", SqlDbType.Int);
                     cmd.Parameters["@returnvalue"].Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@returnvalueString", System.Data.SqlDbType.VarChar,200);
+                    cmd.Parameters["@returnvalueString"].Direction = ParameterDirection.Output;
                     try
                     {
                         cmd.ExecuteNonQuery();
-                        returnResult = Convert.ToInt32(cmd.Parameters["@returnvalue"].Value);
+                        rv.StatusCode = Convert.ToInt32(cmd.Parameters["@returnvalue"].Value);
+                        rv.StatusMessage = Convert.ToString(cmd.Parameters["@returnvalueString"].Value);
+                    }
+                    catch (Exception ex)
+                    {
+                        CommonUtilityClass.ExceptionLog(ex);
+                        rv.StatusCode = 2000;
+                        rv.StatusMessage = "An Error Occured";
+                    }
+                }
+            }
+            return rv;
+        }
+
+
+        public UserData UserInformation(int userID)
+        {
+            UserData ud = new UserData();
+            using (SqlConnection conn = connect.getConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand("UserDetails", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@userID", userID);
+                    try
+                    {
+                        SqlDataReader reader = cmd.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                ud = new UserData
+                                {
+                                    businessid = Convert.ToInt32(reader["businessID"]),
+                                    UserID = Convert.ToInt32(reader["id"]),
+                                    email = reader["email"] is DBNull ? null : (String)reader["email"],
+                                    phone = reader["phoneNumber"] is DBNull ? null : (String)reader["phoneNumber"],
+                                    departmentID = Convert.ToInt32(reader["DepartmentID"]),
+                                    levelID = Convert.ToInt32(reader["levelID"]),
+                                    fullname = reader["fullname"] is DBNull ? null : (String)reader["fullname"],
+                                    active = Convert.ToInt32(reader["active"]),
+                                    lastUpdatePassword = Convert.ToDateTime(reader["lastUpdatePassword"]),
+                                    loggedIn = Convert.ToInt32(reader["loggedIn"]),
+                                };
+                            
+                            }
+                        }
+                        else
+                        {
+                            ud = null;
+                        }
+
                     }
                     catch (Exception ex)
                     {
@@ -147,7 +208,7 @@ namespace ProbitymmAPI.Data
                     }
                 }
             }
-            return returnResult;
+            return ud;
         }
 
         public List<UserData> AllBusinessStaffList(int businessid){

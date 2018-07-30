@@ -14,7 +14,8 @@ namespace ProbitymmAPI.Controllers
     public class AuthenticateController : ApiController
     {
         CommonUtilityClass cuc = new CommonUtilityClass();
- 
+        ReturnValues rv = new ReturnValues();
+
         [HttpGet]
         public IHttpActionResult GetBusinessInfo([FromUri]int businessid)
         {
@@ -46,29 +47,40 @@ namespace ProbitymmAPI.Controllers
                     {   
                         if(ud.UserID > 0)
                         {
-                            result = cuc.GetJsonObject(ud, 1, "Successful Login");
+                            if(ud.active == 0)
+                            {
+                                rv.StatusCode = 4; rv.StatusMessage = "Account has been deactivated";                               
+                            }
+                            else
+                            {
+                                rv.StatusCode = 1; rv.StatusMessage = "Successful Login";
+                                ReturnedData = ud;
+                            }
+                           
                         }
                         else
                         {
-                            result = cuc.GetJsonObject(ReturnedData,2, "Invalid username or password");
+                            rv.StatusCode = 2; rv.StatusMessage = "Invalid username or password";                          
                         }
-                       
+                        result = cuc.GetJsonObject(ReturnedData, rv);            
                         return Ok(result);                   
                     }
                     else
                     {
-                        result = cuc.GetJsonObject(new{ }, 3,"Invalid Login");
-                        return Content(HttpStatusCode.NotFound, result);
+                        rv.StatusCode = 3; rv.StatusMessage = "Invalid Login";                                            
                     }
+
+                    result = cuc.GetJsonObject(ReturnedData, rv);
+                    return Ok(result);
                 }
                 else
                 {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, 100, "Wrong API Key"));
-                }                
+                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
+                }
             }
             else
             {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, 1000, "Incorrect header specification"));
+                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
             }
         }
        
@@ -86,33 +98,18 @@ namespace ProbitymmAPI.Controllers
                 if (apikey == CommonUtilityClass.apikey)
                 {
                     Authentication at = new Authentication();
-                    int i = at.RegisterBusiness(bizRegModel);
-                   
-                    if (i == 3)
-                    {
-                      result =  cuc.GetJsonObject(ReturnedData, i, "Business Successfully registered");
-                      return Ok(result);
-                    }
-                    else if(i == 2)
-                    {
-                        result = cuc.GetJsonObject(ReturnedData, i, "Email address already exist");
-                        return Ok(result);  
-                    }
-                    else if (i == 1)
-                    {
-                        result = cuc.GetJsonObject(ReturnedData, i, "Business name already exist on this platform");
-                        return Ok(result);
-                    }
-                    return Ok();
+                    rv = at.RegisterBusiness(bizRegModel);                    
+                    result = cuc.GetJsonObject(ReturnedData, rv);
+                    return Ok(result);
                 }
                 else
                 {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData,100, "Wrong API Key"));
+                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
                 }
             }
             else
             {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, 1000, "Incorrect header specification"));
+                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
             }
         }
 
@@ -127,33 +124,18 @@ namespace ProbitymmAPI.Controllers
                 if (apikey == CommonUtilityClass.apikey)
                 {
                     Authentication at = new Authentication();
-                    int i = at.ChangePassword(cp);
-
-                    if (i == 3)
-                    {
-                        result = cuc.GetJsonObject(ReturnedData, i, "No such user exists");
-                        return Ok(result);
-                    }
-                    else if (i == 2)
-                    {
-                        result = cuc.GetJsonObject(ReturnedData, i, "Old Password did not match");
-                        return Ok(result);
-                    }
-                    else if (i == 1)
-                    {
-                        result = cuc.GetJsonObject(ReturnedData, i, "password successfully updated");
-                        return Ok(result);
-                    }
-                    return Ok();
+                    rv = at.ChangePassword(cp);
+                    result = cuc.GetJsonObject(ReturnedData, rv);
+                    return Ok(result);
                 }
                 else
                 {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, 100, "Wrong API Key"));
+                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
                 }
             }
             else
             {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, 1000, "Incorrect header specification"));
+                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
             }
         }
 
@@ -172,45 +154,64 @@ namespace ProbitymmAPI.Controllers
                     Authentication at = new Authentication();
                     if (userData.businessid > 0)
                     {
-                        int i = at.RegisterBusinessStaff(userData);
-                        if (i == 5)
-                        {
-                            result = cuc.GetJsonObject(ReturnedData, i, "User phone number or email exists");
-                        }
-                        else if (i == 4)
-                        {
-                            result = cuc.GetJsonObject(ReturnedData, i, "Staff information successfully updated");
-                        }
-                        else if (i == 3)
-                        {
-                            result = cuc.GetJsonObject(ReturnedData, i, "Staff registration is successful");                            
-                        }
-                        else if (i == 2)
-                        {
-                            result = cuc.GetJsonObject(ReturnedData, i, "Phone number already exists");  
-                        }
-                        else if (i == 1)
-                        {
-                            result = cuc.GetJsonObject(ReturnedData, i, "email address already exists");   
-                        }
+                        rv = at.RegisterBusinessStaff(userData);
+                        result = cuc.GetJsonObject(ReturnedData, rv);                       
                     }
                     else
                     {
-                        result = cuc.GetJsonObject(ReturnedData, 6, "you did not supply businessid");
+                        rv.StatusCode = 6;rv.StatusMessage = "you did not supply businessid";
+                        result = cuc.GetJsonObject(ReturnedData,rv);
                     }
                     return Ok(result);
                 }
                 else
                 {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, 100, "Wrong API Key"));
+                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
                 }
             }
             else
             {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, 1000, "Incorrect header specification"));
+                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
             }
         }
 
+
+        [HttpGet]
+        public IHttpActionResult UserInfo([FromUri]int userid)
+        {
+            var result = (Object)null;
+            var ReturnedData = (Object)null;
+
+            if (Request.Headers.Contains("API-KEY"))
+            {
+                string apikey = Request.Headers.GetValues("API-KEY").First();
+                if (apikey == CommonUtilityClass.apikey)
+                {
+                    Authentication at = new Authentication();
+                    if (userid > 0)
+                    {
+                        UserData ud = new UserData();
+                        ud = at.UserInformation(userid);
+                        rv.StatusCode = 1; rv.StatusMessage = "User Information";
+                        result = cuc.GetJsonObject(ud, rv);
+                    }
+                    else
+                    {
+                        rv.StatusCode = 3; rv.StatusMessage = "you did not supply userid";
+                        result = cuc.GetJsonObject(ReturnedData, rv);
+                    }
+                    return Ok(result);
+                }
+                else
+                {
+                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
+                }
+            }
+            else
+            {
+                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
+            }
+        }
 
         [HttpGet]
         public IHttpActionResult AllBusinessStaff([FromUri] int BusinessId)
@@ -223,17 +224,18 @@ namespace ProbitymmAPI.Controllers
                 if (apikey == CommonUtilityClass.apikey)
                 {
                     Authentication at = new Authentication();
-                    result = cuc.GetJsonObject(at.AllBusinessStaffList(BusinessId), 1, "All Staff");
+                    rv.StatusCode = 1;rv.StatusMessage = "All staff";
+                    result = cuc.GetJsonObject(at.AllBusinessStaffList(BusinessId),rv);
                     return Ok(result);
                 }
                 else
                 {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, 100, "Wrong API Key"));
+                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
                 }
             }
             else
             {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, 1000, "Incorrect header specification"));
+                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
             }
         }
 

@@ -13,7 +13,8 @@ namespace ProbitymmAPI.Data
             private static SqlConnection con;
             public static string connectionstring()
             {
-                string DBCon = ConfigurationManager.ConnectionStrings["dbconnection"].ConnectionString;
+                //dbconnectionLive, dbconnectionDev
+                string DBCon = ConfigurationManager.ConnectionStrings["dbconnectionLive"].ConnectionString;
                 return DBCon;
             }
 
