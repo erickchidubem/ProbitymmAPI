@@ -16,21 +16,14 @@ namespace ProbitymmAPI.Controllers
         CommonUtilityClass cuc = new CommonUtilityClass();
         ReturnValues rv = new ReturnValues();
 
+        //GET API  : GetBusinessInfo
         [HttpGet]
         public IHttpActionResult GetBusinessInfo([FromUri]int businessid)
         {
-
             return Ok();
         }
-
-        #region LoginSection
-       /// <summary>
-       /// Tries to check if User is registered and returns the user information 
-       /// if credentials are valid
-       /// </summary>
-       /// <param name="loginData"></param>
-       /// <returns></returns>
-        //Post API : Login Registered Users
+        
+        //POST API : Login Registered Users
         [HttpPost]
         public IHttpActionResult Login([FromBody]LoginData loginData)
         {
@@ -84,7 +77,6 @@ namespace ProbitymmAPI.Controllers
             }
         }
        
-        #endregion
 
         //POST API : Register Business Account
         [HttpPost]
@@ -113,6 +105,7 @@ namespace ProbitymmAPI.Controllers
             }
         }
 
+        //POST API : 
         [HttpPost]
         public IHttpActionResult ChangePassword([FromBody]ChangePassword cp)
         {
@@ -175,7 +168,7 @@ namespace ProbitymmAPI.Controllers
             }
         }
 
-
+        //GET API : Get a user information
         [HttpGet]
         public IHttpActionResult UserInfo([FromUri]int userid)
         {
@@ -213,6 +206,7 @@ namespace ProbitymmAPI.Controllers
             }
         }
 
+        //GET API : Get all staff in a business
         [HttpGet]
         public IHttpActionResult AllBusinessStaff([FromUri] int BusinessId)
         {
@@ -239,6 +233,7 @@ namespace ProbitymmAPI.Controllers
             }
         }
 
+        //POST API : Modify business information
         [HttpPost]
         public IHttpActionResult ModifyBusinessInformation([FromBody]BizRegModel brm)
         {
