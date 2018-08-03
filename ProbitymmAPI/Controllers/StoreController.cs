@@ -83,5 +83,42 @@ namespace ProbitymmAPI.Controllers
                 return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
             }
         }
+
+        [HttpGet]
+        public IHttpActionResult GetAllRawMaterials([FromUri]int BusinessId)
+        {
+
+            var result = (Object)null;
+            var ReturnedData = (Object)null;
+            if (Request.Headers.Contains("API-KEY"))
+            {
+                string apikey = Request.Headers.GetValues("API-KEY").First();
+                if (apikey == CommonUtilityClass.apikey)
+                {
+                    Store st = new Store();
+                    if (BusinessId > 0)
+                    {
+                        rv.StatusCode = 1; rv.StatusMessage = "Your raw material list";
+                        ReturnedData = st.GetAllMaterials(BusinessId);
+                        result = cuc.GetJsonObject(ReturnedData, rv);
+                    }
+                    else
+                    {
+                        rv.StatusCode = 0; rv.StatusMessage = "you did not supply businessid";
+                        result = cuc.GetJsonObject(ReturnedData, rv);
+                    }
+                    return Ok(result);
+                }
+                else
+                {
+                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
+                }
+            }
+            else
+            {
+                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
+            }
+        }
+       
     }
 }

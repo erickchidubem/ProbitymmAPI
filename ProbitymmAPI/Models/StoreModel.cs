@@ -11,11 +11,13 @@ namespace ProbitymmAPI.Models
         public int id { get; set; }
         public int BusinessId { get; set; }
         public int userid { get; set; }
+        public string createdByName { get; set; }
         public string MaterialName { get; set; }
         public decimal Qty { get; set; }
         public decimal CostPrice { get; set; }
         public decimal SellingPrice { get; set; }
         public int MeasureId { get; set; }
+        public string measurementTitle { get; set; }
         public int active { get; set; }
         public decimal QtyAlert { get; set; }
         public DateTime createddate { get; set; }

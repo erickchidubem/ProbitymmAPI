@@ -56,6 +56,42 @@ namespace ProbitymmAPI.Data
             return ud;
         }
 
+        public int CheckLoginCredentials(UserData ld)
+        {
+            int n = 0;
+            using (SqlConnection conn = connect.getConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand("CheckCredentialsLogin", conn))
+                {
+                   // @businessid = 1,@userid = 1,@lastpassword = '',@returnvalue = 1
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@userid", ld.UserID);
+                    cmd.Parameters.AddWithValue("@businessid", ld.businessid);
+                    cmd.Parameters.AddWithValue("@lastpassword", ld.lastUpdatePassword);
+                    cmd.Parameters.Add("@returnvalue", SqlDbType.Int);
+                    cmd.Parameters["@returnvalue"].Direction = ParameterDirection.Output;
+
+                    try
+                    {
+                        SqlDataReader reader = cmd.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                n = Convert.ToInt32(cmd.Parameters["@returnvalue"].Value);
+                            }
+                        }       
+                    }
+                    catch (Exception ex)
+                    {
+                        CommonUtilityClass.ExceptionLog(ex);
+                    }
+                }
+            }
+            return n;
+        }
+
+
         public ReturnValues RegisterBusiness(BizRegModel bzm)
         {
             ReturnValues rv = new ReturnValues();

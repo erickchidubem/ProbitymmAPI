@@ -86,10 +86,54 @@ namespace ProbitymmAPI.Data
             return rv;
         }
 
-        public List<StoreModel> GetAllMaterials(int buinessid)
+        public List<StoreModel> GetAllMaterials(int businessid)
         {
             List<StoreModel> sm = new List<StoreModel>();
+            using (SqlConnection conn = connect.getConnection())
+            {
 
+                using (SqlCommand cmd = new SqlCommand("getBusinessRawMaterials", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@businessid", businessid);
+                    try
+                    {
+                        StoreModel _sm = new StoreModel();
+                        SqlDataReader reader = cmd.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                _sm = new StoreModel {
+                                    id = Convert.ToInt32(reader["id"]),
+                                    BusinessId = Convert.ToInt32(reader["businessID"]),
+                                    userid = Convert.ToInt32(reader["createdBy"]),
+                                    createdByName = reader["createdByName"] is DBNull ? null : (String)reader["createdByName"],
+                                    MaterialName = reader["MaterialName"] is DBNull ? null : (String)reader["MaterialName"],
+                                    Qty = Convert.ToDecimal(reader["Qty"]),
+                                    CostPrice = Convert.ToDecimal(reader["CostPrice"]),
+                                    SellingPrice = Convert.ToDecimal(reader["SellingPrice"]),
+                                    MeasureId = Convert.ToInt32(reader["measureID"]),
+                                    measurementTitle = reader["measurement"] is DBNull ? null : (String)reader["measurement"],
+                                    active = Convert.ToInt32(reader["active"]),
+                                    QtyAlert = Convert.ToDecimal(reader["QtyAlert"])
+                                };
+
+                                sm.Add(_sm);
+                            }
+                        }
+                        else
+                        {
+                            sm = null;
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                        CommonUtilityClass.ExceptionLog(ex);
+                    }
+                }
+            }
 
             return sm;
         }

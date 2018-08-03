@@ -32,6 +32,8 @@ namespace ProbitymmAPI.Models
         public int active { get; set; }
         public int loggedIn { get; set; }
     }
+
+   
    
     public class BizRegModel
     {

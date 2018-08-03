@@ -239,5 +239,42 @@ namespace ProbitymmAPI.Controllers
         {
             return Ok();
         }
+
+        [HttpPost]
+        public IHttpActionResult CheckLoginCredentials([FromBody]UserData ud)
+        {
+
+            var result = (Object)null;
+            var ReturnedData = (Object)null;
+            if (Request.Headers.Contains("API-KEY"))
+            {
+                string apikey = Request.Headers.GetValues("API-KEY").First();
+                if (apikey == CommonUtilityClass.apikey)
+                {
+                    Authentication at = new Authentication();
+                    int ifix = at.CheckLoginCredentials(ud);
+                    
+                        if (ifix == 0)
+                        {
+                            rv.StatusCode = ifix; rv.StatusMessage = "Incorrect";
+                        }
+                        else if (ifix == 1)
+                        {
+                            rv.StatusCode = ifix; rv.StatusMessage = "Correct";
+                        }
+                        result = cuc.GetJsonObject(ReturnedData, rv);
+                        return Ok(result);
+                }
+                else
+                {
+                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
+                }
+            }
+            else
+            {
+                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
+            }
+        }
+
     }
 }
