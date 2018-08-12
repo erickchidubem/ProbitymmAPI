@@ -208,7 +208,7 @@ namespace ProbitymmAPI.Controllers
 
         //GET API : Get all staff in a business
         [HttpGet]
-        public IHttpActionResult AllBusinessStaff([FromUri] int BusinessId)
+        public IHttpActionResult AllBusinessStaff([FromUri]int BusinessId)
         {
             var result = (Object)null;
             var ReturnedData = (Object)null;

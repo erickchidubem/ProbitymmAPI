@@ -40,5 +40,31 @@ namespace ProbitymmAPI.Models
         public int updatePrice { get; set; }
     }
 
+    public class RawDisbursement
+    {
+        public int DistributId { get; set; }
+        public int BusinessId { get; set; }
+        public int UserId { get; set; }
+        public string CreatedBy { get; set; }
+        public Nullable<DateTime> createddate { get; set; }
+        public int ProductManagerId { get; set; } 
+        public string productManagerName { get; set; }
+        public int productmanagerAccept { get; set; }
+        public Nullable<DateTime> productManagerAcceptDate { get; set; }
+        public List<ItemQty> Items { get; set; }  
+        public int AdminApprove { get; set; }
+        public Nullable<DateTime> AdminApproveDate { get; set; }
+        public string AdminName { get; set; }
+    }
+
+    public class ItemQty
+    {
+        public int ItemId { get; set; }
+        public int RawMaterialDisId { get; set; }
+        public int RawMaterialId { get; set; }
+        public string MaterialName { get; set; }
+        public decimal Qty { get; set; }
+        public string measurement { get; set; }
+    }
     
 }

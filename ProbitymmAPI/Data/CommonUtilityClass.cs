@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 
@@ -14,6 +16,42 @@ namespace ProbitymmAPI.Data
         public static void ExceptionLog(Exception ex)
         {
             
+        }
+
+
+        public int ConfirmRawMaterialIDAgainstBusinessID(int BusinessId, int anyID,int CheckValueType)
+        {
+            /*check value type 
+             ------------------
+             1 - Raw Material
+             2 - User Id
+             3 - Product Id
+             4 - 
+             */
+            int value = 0;
+            using (SqlConnection conn = connect.getConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand("ConfirmAgainstBusinessID", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@businessID", BusinessId);
+                    cmd.Parameters.AddWithValue("@anyID", anyID);
+                    cmd.Parameters.AddWithValue("@CheckValueType", CheckValueType);
+                    cmd.Parameters.Add("@returnvalue", SqlDbType.Int);
+                    cmd.Parameters["@returnvalue"].Direction = ParameterDirection.Output;
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                        value = Convert.ToInt32(cmd.Parameters["@returnvalue"].Value);  
+                    }
+                    catch (Exception ex)
+                    {
+                        CommonUtilityClass.ExceptionLog(ex);
+                    }
+                }
+            }
+
+            return value;
         }
 
         public Object GetJsonObject(Object _ReturnedData,ReturnValues rv)

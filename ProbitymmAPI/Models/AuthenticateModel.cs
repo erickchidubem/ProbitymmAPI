@@ -11,7 +11,6 @@ namespace ProbitymmAPI.Models
 
     }
 
-
     public class LoginData
     {
         public string email { get; set; }
@@ -32,9 +31,7 @@ namespace ProbitymmAPI.Models
         public int active { get; set; }
         public int loggedIn { get; set; }
     }
-
-   
-   
+ 
     public class BizRegModel
     {
         public string businessName { get; set; }
