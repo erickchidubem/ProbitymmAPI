@@ -295,9 +295,6 @@ namespace ProbitymmAPI.Data
             return AllStaff;
         }
 
-        public int ConfirmUserIDAgainstBusinessID(int BusinessId, int UserId)
-        {
-
-        }
+       
     }
 }
