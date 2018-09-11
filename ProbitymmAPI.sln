@@ -5,6 +5,10 @@ VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProbitymmAPI", "ProbitymmAPI\ProbitymmAPI.csproj", "{536B2A60-2914-46FE-8FC8-ECE57C5AE6CE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{F23A054E-F4A8-4F80-8A94-A120C9E00EE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notification", "Notification\Notification.csproj", "{9963B5D4-BC92-4DA5-BB34-28A6254B23F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{536B2A60-2914-46FE-8FC8-ECE57C5AE6CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{536B2A60-2914-46FE-8FC8-ECE57C5AE6CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{536B2A60-2914-46FE-8FC8-ECE57C5AE6CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F23A054E-F4A8-4F80-8A94-A120C9E00EE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F23A054E-F4A8-4F80-8A94-A120C9E00EE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F23A054E-F4A8-4F80-8A94-A120C9E00EE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F23A054E-F4A8-4F80-8A94-A120C9E00EE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9963B5D4-BC92-4DA5-BB34-28A6254B23F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9963B5D4-BC92-4DA5-BB34-28A6254B23F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9963B5D4-BC92-4DA5-BB34-28A6254B23F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9963B5D4-BC92-4DA5-BB34-28A6254B23F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

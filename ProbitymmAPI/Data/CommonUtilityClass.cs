@@ -12,8 +12,9 @@ namespace ProbitymmAPI.Data
     public class CommonUtilityClass
     {
         public static string apikey = ConfigurationManager.AppSettings["API-KEY"].ToString();
+        public static string apiEncryptKey = "0123456789ABCDEF";
 
-        public static void ExceptionLog(Exception ex)
+        public async static void ExceptionLog(Exception ex)
         {
             
         }
@@ -46,7 +47,7 @@ namespace ProbitymmAPI.Data
                     }
                     catch (Exception ex)
                     {
-                        CommonUtilityClass.ExceptionLog(ex);
+                        ExceptionLog(ex);
                     }
                 }
             }
@@ -71,6 +72,10 @@ namespace ProbitymmAPI.Data
             else if (i == 2)
             {
                 rv.StatusCode = 1000; rv.StatusMessage = "Incorrect header specification";
+            }
+            else if (i == 3)
+            {
+                rv.StatusCode = 3000; rv.StatusMessage = "User ID or Business ID is not matching";
             }
             return rv;
         }

@@ -30,6 +30,7 @@ namespace ProbitymmAPI.Models
         public DateTime lastUpdatePassword { get; set; }
         public int active { get; set; }
         public int loggedIn { get; set; }
+        public string token { get; set; }
     }
  
     public class BizRegModel

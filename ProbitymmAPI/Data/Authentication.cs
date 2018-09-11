@@ -1,4 +1,5 @@
 ﻿using ProbitymmAPI.Models;
+using ProbitymmAPI.Security;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -10,6 +11,81 @@ namespace ProbitymmAPI.Data
 {
     public class Authentication
     {
+        public CryptoEngine ce = new CryptoEngine();
+
+        public string GenerateUserToken(int userid,int businessid)
+        {
+            string tokenString = ce.GenerateRandomeStrings(20);
+            string returnToken = "";
+            using (SqlConnection conn = connect.getConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand("GenerateToken", conn))//call Stored Procedure
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@token", tokenString);
+                    cmd.Parameters.AddWithValue("@userId", userid);
+                    cmd.Parameters.AddWithValue("@businessId",businessid);     
+                    cmd.Parameters.Add("@returnvalue", System.Data.SqlDbType.Int);
+                    cmd.Parameters["@returnvalue"].Direction = ParameterDirection.Output;
+                   
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                        if(Convert.ToInt32(cmd.Parameters["@returnvalue"].Value) == 1)
+                        {
+                            returnToken = tokenString;// ce.Encrypt(tokenString, CommonUtilityClass.apiEncryptKey);
+                        }                      
+                    }
+                    catch (Exception ex)
+                    {
+                        CommonUtilityClass.ExceptionLog(ex);  
+                    }
+                }
+            }
+            return returnToken;
+            
+        }
+
+        public static ReturnValuesBool ValidateToken(string token, int userid,int businessid)
+        {
+            ReturnValuesBool rvb = new ReturnValuesBool();
+            rvb.StatusFlag = false;
+            using (SqlConnection conn = connect.getConnection())
+            {
+                using (SqlCommand cmd = new SqlCommand("ValidateToken", conn))//call Stored Procedure
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@token", token);
+                    cmd.Parameters.AddWithValue("@businessId", businessid);
+                    cmd.Parameters.AddWithValue("@userId", userid);
+                    cmd.Parameters.Add("@returnvalue", System.Data.SqlDbType.Int);
+                    cmd.Parameters["@returnvalue"].Direction = ParameterDirection.Output;
+                    
+                    try
+                    {
+                        cmd.ExecuteNonQuery();
+                        rvb.StatusCode = Convert.ToInt32(cmd.Parameters["@returnvalue"].Value);
+                        if (rvb.StatusCode == 1)
+                        { rvb.StatusFlag = true; }
+                        else
+                        {
+                            if(rvb.StatusCode == 2) { rvb.StatusMessage = "Token has expired"; }
+                            if (rvb.StatusCode == 0) { rvb.StatusMessage = "Another user loggedIn with your account"; }
+                            rvb.StatusFlag = false;
+                        }
+                            
+                        
+                    }
+                    catch (Exception ex)
+                    {
+                        CommonUtilityClass.ExceptionLog(ex);
+                        
+                    }
+                }
+            }
+            return rvb;
+        }
+
         public UserData Login(LoginData ld)
         {
             UserData ud = new UserData();
@@ -28,8 +104,8 @@ namespace ProbitymmAPI.Data
                             while (reader.Read())
                             {
                                 ud = new UserData {
-                                        businessid = Convert.ToInt32(reader["businessID"]),
-                                        UserID = Convert.ToInt32(reader["id"]),
+                                       businessid = Convert.ToInt32(reader["businessID"]),
+                                       UserID = Convert.ToInt32(reader["id"]),
                                        email = reader["email"] is DBNull ? null : (String)reader["email"],
                                        phone = reader["phoneNumber"] is DBNull ? null : (String)reader["phoneNumber"],
                                        departmentID = Convert.ToInt32(reader["DepartmentID"]),
@@ -38,6 +114,7 @@ namespace ProbitymmAPI.Data
                                        active = Convert.ToInt32(reader["active"]),
                                        lastUpdatePassword = Convert.ToDateTime(reader["lastUpdatePassword"]),
                                        loggedIn = Convert.ToInt32(reader["loggedIn"]),
+                                       token = GenerateUserToken(Convert.ToInt32(reader["id"]), Convert.ToInt32(reader["businessID"]))
                                 };
                             }
                         }
@@ -90,7 +167,6 @@ namespace ProbitymmAPI.Data
             }
             return n;
         }
-
 
         public ReturnValues RegisterBusiness(BizRegModel bzm)
         {
@@ -293,8 +369,7 @@ namespace ProbitymmAPI.Data
                 }
             }
             return AllStaff;
-        }
-
+        }       
        
     }
 }

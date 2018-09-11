@@ -1,5 +1,6 @@
 ﻿using ProbitymmAPI.Data;
 using ProbitymmAPI.Models;
+using ProbitymmAPI.Security;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -15,8 +16,10 @@ namespace ProbitymmAPI.Controllers
     {
         CommonUtilityClass cuc = new CommonUtilityClass();
         ReturnValues rv = new ReturnValues();
+        Authentication at = new Authentication();
 
         //GET API  : GetBusinessInfo
+        [AuthorizeUserAttribute]
         [HttpGet]
         public IHttpActionResult GetBusinessInfo([FromUri]int businessid)
         {
@@ -33,8 +36,7 @@ namespace ProbitymmAPI.Controllers
             {
                 string apikey = Request.Headers.GetValues("API-KEY").First();
                 if(apikey == CommonUtilityClass.apikey)
-                {
-                    Authentication at = new Authentication();
+                { 
                     UserData ud = at.Login(loginData);
                     if (ud != null)
                     {   
@@ -105,175 +107,106 @@ namespace ProbitymmAPI.Controllers
             }
         }
 
-        //POST API : 
+        //POST API :
+        [AuthorizeUserAttribute]
         [HttpPost]
         public IHttpActionResult ChangePassword([FromBody]ChangePassword cp)
         {
             var result = (Object)null;
             var ReturnedData = (Object)null;
-            if (Request.Headers.Contains("API-KEY"))
-            {
-                string apikey = Request.Headers.GetValues("API-KEY").First();
-                if (apikey == CommonUtilityClass.apikey)
-                {
-                    Authentication at = new Authentication();
-                    rv = at.ChangePassword(cp);
-                    result = cuc.GetJsonObject(ReturnedData, rv);
-                    return Ok(result);
-                }
-                else
-                {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
-                }
-            }
-            else
-            {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
-            }
+  
+            rv = at.ChangePassword(cp);
+            result = cuc.GetJsonObject(ReturnedData, rv);
+            return Ok(result);
+              
         }
 
         //POST API : Register Business Staff
+        [AuthorizeUserAttribute]
         [HttpPost]
         public IHttpActionResult RegisterEditStaff([FromBody]UserData userData)
         {
             var result = (Object)null;
             var ReturnedData = (Object)null;
-
-            if (Request.Headers.Contains("API-KEY"))
+            
+            if (userData.businessid > 0)
             {
-                string apikey = Request.Headers.GetValues("API-KEY").First();
-                if (apikey == CommonUtilityClass.apikey)
-                {
-                    Authentication at = new Authentication();
-                    if (userData.businessid > 0)
-                    {
-                        rv = at.RegisterBusinessStaff(userData);
-                        result = cuc.GetJsonObject(ReturnedData, rv);                       
-                    }
-                    else
-                    {
-                        rv.StatusCode = 6;rv.StatusMessage = "you did not supply businessid";
-                        result = cuc.GetJsonObject(ReturnedData,rv);
-                    }
-                    return Ok(result);
-                }
-                else
-                {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
-                }
+                rv = at.RegisterBusinessStaff(userData);
+                result = cuc.GetJsonObject(ReturnedData, rv);                       
             }
             else
             {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
+                rv.StatusCode = 6;rv.StatusMessage = "you did not supply businessid";
+                result = cuc.GetJsonObject(ReturnedData,rv);
             }
+            return Ok(result);
+                
         }
 
         //GET API : Get a user information
+        [AuthorizeUserAttribute]
         [HttpGet]
         public IHttpActionResult UserInfo([FromUri]int userid)
         {
             var result = (Object)null;
             var ReturnedData = (Object)null;
 
-            if (Request.Headers.Contains("API-KEY"))
+           if (userid > 0)
             {
-                string apikey = Request.Headers.GetValues("API-KEY").First();
-                if (apikey == CommonUtilityClass.apikey)
-                {
-                    Authentication at = new Authentication();
-                    if (userid > 0)
-                    {
-                        UserData ud = new UserData();
-                        ud = at.UserInformation(userid);
-                        rv.StatusCode = 1; rv.StatusMessage = "User Information";
-                        result = cuc.GetJsonObject(ud, rv);
-                    }
-                    else
-                    {
-                        rv.StatusCode = 3; rv.StatusMessage = "you did not supply userid";
-                        result = cuc.GetJsonObject(ReturnedData, rv);
-                    }
-                    return Ok(result);
-                }
-                else
-                {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
-                }
+                UserData ud = new UserData();
+                ud = at.UserInformation(userid);
+                rv.StatusCode = 1; rv.StatusMessage = "User Information";
+                result = cuc.GetJsonObject(ud, rv);
             }
             else
             {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
+                rv.StatusCode = 3; rv.StatusMessage = "you did not supply userid";
+                result = cuc.GetJsonObject(ReturnedData, rv);
             }
+            return Ok(result);
         }
 
         //GET API : Get all staff in a business
+        [AuthorizeUserAttribute]
         [HttpGet]
         public IHttpActionResult AllBusinessStaff([FromUri]int BusinessId)
         {
             var result = (Object)null;
             var ReturnedData = (Object)null;
-            if (Request.Headers.Contains("API-KEY"))
-            {
-                string apikey = Request.Headers.GetValues("API-KEY").First();
-                if (apikey == CommonUtilityClass.apikey)
-                {
-                    Authentication at = new Authentication();
-                    rv.StatusCode = 1;rv.StatusMessage = "All staff";
-                    result = cuc.GetJsonObject(at.AllBusinessStaffList(BusinessId),rv);
-                    return Ok(result);
-                }
-                else
-                {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
-                }
-            }
-            else
-            {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
-            }
+            
+            Authentication at = new Authentication();
+            rv.StatusCode = 1;rv.StatusMessage = "All staff";
+            result = cuc.GetJsonObject(at.AllBusinessStaffList(BusinessId),rv);
+            return Ok(result);
         }
 
         //POST API : Modify business information
+        [AuthorizeUserAttribute]
         [HttpPost]
         public IHttpActionResult ModifyBusinessInformation([FromBody]BizRegModel brm)
         {
             return Ok();
         }
 
+        [AuthorizeUserAttribute]
         [HttpPost]
         public IHttpActionResult CheckLoginCredentials([FromBody]UserData ud)
         {
 
             var result = (Object)null;
-            var ReturnedData = (Object)null;
-            if (Request.Headers.Contains("API-KEY"))
-            {
-                string apikey = Request.Headers.GetValues("API-KEY").First();
-                if (apikey == CommonUtilityClass.apikey)
-                {
-                    Authentication at = new Authentication();
-                    int ifix = at.CheckLoginCredentials(ud);
+            var ReturnedData = (Object)null;           
+            int ifix = at.CheckLoginCredentials(ud);
                     
-                        if (ifix == 0)
-                        {
-                            rv.StatusCode = ifix; rv.StatusMessage = "Incorrect";
-                        }
-                        else if (ifix == 1)
-                        {
-                            rv.StatusCode = ifix; rv.StatusMessage = "Correct";
-                        }
-                        result = cuc.GetJsonObject(ReturnedData, rv);
-                        return Ok(result);
-                }
-                else
+                if (ifix == 0)
                 {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
+                    rv.StatusCode = ifix; rv.StatusMessage = "Incorrect";
                 }
-            }
-            else
-            {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
-            }
+                else if (ifix == 1)
+                {
+                    rv.StatusCode = ifix; rv.StatusMessage = "Correct";
+                }
+                result = cuc.GetJsonObject(ReturnedData, rv);
+                return Ok(result);
         }
 
     }

@@ -299,7 +299,8 @@ namespace ProbitymmAPI.Data
                                     RawMaterialDisId = Convert.ToInt32(reader["RawMaterialDisID"]),
                                     RawMaterialId = Convert.ToInt32(reader["RawMaterialId"]),
                                     MaterialName = reader["MaterialName"] is DBNull ? null : (String)reader["MaterialName"],
-                                    measurement = reader["measurement"] is DBNull ? null : (String)reader["measurement"]  
+                                    measurement = reader["measurement"] is DBNull ? null : (String)reader["measurement"],
+                                    Qty = Convert.ToInt32(reader["Qty"])
                                 };
 
                                 sm.Add(_sm);
@@ -320,8 +321,6 @@ namespace ProbitymmAPI.Data
 
             return sm;
         }
-
-
 
     }
 }

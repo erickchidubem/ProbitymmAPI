@@ -11,10 +11,10 @@ namespace ProbitymmAPI.Data
         public class connect
         {
             private static SqlConnection con;
-            public static string connectionstring()
+            private static string connectionstring()
             {
                 //dbconnectionLive, dbconnectionDev
-                string DBCon = ConfigurationManager.ConnectionStrings["dbconnectionLive"].ConnectionString;
+                string DBCon = ConfigurationManager.ConnectionStrings["dbconnectionDev"].ConnectionString;
                 return DBCon;
             }
 

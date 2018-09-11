@@ -1,5 +1,6 @@
 ﻿using ProbitymmAPI.Data;
 using ProbitymmAPI.Models;
+using ProbitymmAPI.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,79 +10,52 @@ using System.Web.Http;
 
 namespace ProbitymmAPI.Controllers
 {
+    [AuthorizeUserAttribute]
     public class StoreController : ApiController
     {
-        CommonUtilityClass cuc = new CommonUtilityClass();
+        private CommonUtilityClass cuc = new CommonUtilityClass();
         ReturnValues rv = new ReturnValues();
+        Store st = new Store();
+
 
         [HttpPost]
         public IHttpActionResult RegisterModifyRawMaterial([FromBody]StoreModel store)
         {
             var result = (Object)null;
             var ReturnedData = (Object)null;        
-            if (Request.Headers.Contains("API-KEY"))
+                    
+            if (store.BusinessId > 0)
             {
-                string apikey = Request.Headers.GetValues("API-KEY").First();
-                if (apikey == CommonUtilityClass.apikey)
-                {
-                    Store st = new Store();
-                    if (store.BusinessId > 0)
-                    {
                        
-                        rv = st.CreateModifyRawMaterial(store);
-                        result = cuc.GetJsonObject(ReturnedData, rv);                                                                      
-                    }
-                    else
-                    {
-                        rv.StatusCode = 6; rv.StatusMessage = "you did not supply businessid";
-                        result = cuc.GetJsonObject(ReturnedData,rv);
-                    }
-                    return Ok(result);
-                }
-                else
-                {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData,cuc.Error(1)));
-                }
+                rv = st.CreateModifyRawMaterial(store);
+                result = cuc.GetJsonObject(ReturnedData, rv);                                                                      
             }
             else
             {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
+                rv.StatusCode = 6; rv.StatusMessage = "you did not supply businessid";
+                result = cuc.GetJsonObject(ReturnedData,rv);
             }
+            return Ok(result);
         }
-
 
         [HttpPost]
         public IHttpActionResult AddRemoveRawMaterials([FromBody]StoreMaterial sm)
         {
             var result = (Object)null;
             var ReturnedData = (Object)null;
-            if (Request.Headers.Contains("API-KEY"))
+            
+            if (sm.UserId > 0 && sm.BusinessId > 0)
             {
-                string apikey = Request.Headers.GetValues("API-KEY").First();
-                if (apikey == CommonUtilityClass.apikey)
-                {
-                    Store st = new Store();
-                    if (sm.UserId > 0 && sm.BusinessId > 0)
-                    {
-                        rv = st.AddRemove(sm);
-                        result = cuc.GetJsonObject(ReturnedData, rv);
-                    }
-                    else
-                    {
-                        rv.StatusCode = 6; rv.StatusMessage = "you did not supply businessid or userid";
-                        result = cuc.GetJsonObject(ReturnedData, rv);
-                    }
-                    return Ok(result);
-                }
-                else
-                {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
-                }
+                rv = st.AddRemove(sm);
+                result = cuc.GetJsonObject(ReturnedData, rv);
             }
             else
             {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
+                rv.StatusCode = 6; rv.StatusMessage = "you did not supply businessid or userid";
+                result = cuc.GetJsonObject(ReturnedData, rv);
             }
+            return Ok(result);
+               
         }
 
         [HttpGet]
@@ -90,34 +64,20 @@ namespace ProbitymmAPI.Controllers
 
             var result = (Object)null;
             var ReturnedData = (Object)null;
-            if (Request.Headers.Contains("API-KEY"))
+            
+            if (BusinessId > 0)
             {
-                string apikey = Request.Headers.GetValues("API-KEY").First();
-                if (apikey == CommonUtilityClass.apikey)
-                {
-                    Store st = new Store();
-                    if (BusinessId > 0)
-                    {
-                        rv.StatusCode = 1; rv.StatusMessage = "Your raw material list";
-                        ReturnedData = st.GetAllMaterials(BusinessId);
-                        result = cuc.GetJsonObject(ReturnedData, rv);
-                    }
-                    else
-                    {
-                        rv.StatusCode = 0; rv.StatusMessage = "you did not supply businessid";
-                        result = cuc.GetJsonObject(ReturnedData, rv);
-                    }
-                    return Ok(result);
-                }
-                else
-                {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
-                }
+                rv.StatusCode = 1; rv.StatusMessage = "Your raw material list";
+                ReturnedData = st.GetAllMaterials(BusinessId);
+                result = cuc.GetJsonObject(ReturnedData, rv);
             }
             else
             {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
+                rv.StatusCode = 0; rv.StatusMessage = "you did not supply businessid";
+                result = cuc.GetJsonObject(ReturnedData, rv);
             }
+            return Ok(result);
+               
         }
        
         [HttpPost]
@@ -125,41 +85,27 @@ namespace ProbitymmAPI.Controllers
         {
             var result = (Object)null;
             var ReturnedData = (Object)null;
-            if (Request.Headers.Contains("API-KEY"))
+           
+            if (rd.BusinessId > 0  && rd.UserId > 0 && rd.ProductManagerId > 0)
             {
-                string apikey = Request.Headers.GetValues("API-KEY").First();
-                if (apikey == CommonUtilityClass.apikey)
+                if (cuc.ConfirmRawMaterialIDAgainstBusinessID(rd.BusinessId, rd.ProductManagerId, 2) == 1)
                 {
-                    Store st = new Store();
-                    if (rd.BusinessId > 0  && rd.UserId > 0 && rd.ProductManagerId > 0)
-                    {
-                        if (cuc.ConfirmRawMaterialIDAgainstBusinessID(rd.BusinessId, rd.ProductManagerId, 2) == 1)
-                        {
-                            rv = st.AddModifyRawMaterialDistribution(rd);
-                            result = cuc.GetJsonObject(ReturnedData, rv);
-                        }
-                        else
-                        {
-                            rv.StatusCode = 7; rv.StatusMessage = "This product manager does not exist in your business";
-                            result = cuc.GetJsonObject(ReturnedData, rv);
-                        }
-                    }
-                    else
-                    {
-                        rv.StatusCode = 6; rv.StatusMessage = "you did not supply businessid or userid or productManagerId";
-                        result = cuc.GetJsonObject(ReturnedData, rv);
-                    }
-                    return Ok(result);
+                    rv = st.AddModifyRawMaterialDistribution(rd);
+                    result = cuc.GetJsonObject(ReturnedData, rv);
                 }
                 else
                 {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
+                    rv.StatusCode = 7; rv.StatusMessage = "This product manager does not exist in your business";
+                    result = cuc.GetJsonObject(ReturnedData, rv);
                 }
             }
             else
             {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
+                rv.StatusCode = 6; rv.StatusMessage = "you did not supply businessid or userid or productManagerId";
+                result = cuc.GetJsonObject(ReturnedData, rv);
             }
+            return Ok(result);
+               
         }
 
         [HttpGet]
@@ -167,34 +113,20 @@ namespace ProbitymmAPI.Controllers
         {           
             var result = (Object)null;
             var ReturnedData = (Object)null;
-            if (Request.Headers.Contains("API-KEY"))
+           
+            if (BusinessId > 0)
             {
-                string apikey = Request.Headers.GetValues("API-KEY").First();
-                if (apikey == CommonUtilityClass.apikey)
-                {
-                    Store st = new Store();
-                    if (BusinessId > 0)
-                    {
-                        rv.StatusCode = 1; rv.StatusMessage = "Your raw material list";
-                        ReturnedData = st.getRawMaterialDistributionTicket(BusinessId);
-                        result = cuc.GetJsonObject(ReturnedData, rv);   
-                    }
-                    else
-                    {
-                        rv.StatusCode = 0; rv.StatusMessage = "you did not supply businessid";
-                        result = cuc.GetJsonObject(ReturnedData, rv);
-                    }
-                    return Ok(result);
-                }
-                else
-                {
-                    return Content(HttpStatusCode.Unauthorized, cuc.GetJsonObject(ReturnedData, cuc.Error(1)));
-                }
+                rv.StatusCode = 1; rv.StatusMessage = "Your raw material list";
+                ReturnedData = st.getRawMaterialDistributionTicket(BusinessId);
+                result = cuc.GetJsonObject(ReturnedData, rv);   
             }
             else
             {
-                return Content(HttpStatusCode.Forbidden, cuc.GetJsonObject(ReturnedData, cuc.Error(2)));
+                rv.StatusCode = 0; rv.StatusMessage = "you did not supply businessid";
+                result = cuc.GetJsonObject(ReturnedData, rv);
             }
+            return Ok(result);
+              
         }
     }
 }
