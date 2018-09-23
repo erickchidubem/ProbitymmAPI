@@ -39,7 +39,7 @@ namespace ProbitymmAPI.Data
                     {
                         cmd.ExecuteNonQuery();
                         int myProductId = Convert.ToInt32(cmd.Parameters["@productID"].Value);
-                        rv.StatusCode = Convert.ToInt32(cmd.Parameters["@returnvalue"].Value);
+                        rv.StatusCode = Convert.ToInt32(cmd.Parameters["@returnvalue"].Value);                   
                         this.AddModifyRawMaterialForFinishedProducts(myProductId, pm.BusinessId, pm.productRaws);
                         rv.StatusMessage = Convert.ToString(cmd.Parameters["@returnvalueString"].Value);
                     }
@@ -76,10 +76,10 @@ namespace ProbitymmAPI.Data
                     cmd.Parameters.AddWithValue("@productID", itm.productId);
                     cmd.Parameters.AddWithValue("@rawMaterialID", itm.rawMaterialID);
                     cmd.Parameters.AddWithValue("@rawMaterialQty", itm.rawMaterialQty);
-                    /*    cmd.Parameters.Add("@returnvalue", SqlDbType.Int);
-                        cmd.Parameters["@returnvalue"].Direction = ParameterDirection.Output;
-                        cmd.Parameters.Add("@returnvalueString", System.Data.SqlDbType.VarChar, 200);
-                        cmd.Parameters["@returnvalueString"].Direction = ParameterDirection.Output; */
+                    cmd.Parameters.Add("@returnvalue", SqlDbType.Int);
+                    cmd.Parameters["@returnvalue"].Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("@returnvalueString", System.Data.SqlDbType.VarChar, 200);
+                    cmd.Parameters["@returnvalueString"].Direction = ParameterDirection.Output; 
                     try
                     {
                         cmd.ExecuteNonQuery();
@@ -177,8 +177,6 @@ namespace ProbitymmAPI.Data
         }
 
 
-
-
         public ReturnValues AdminApproveSendToShop(AdminApprove adap)
         {
             ReturnValues rv = new ReturnValues();
@@ -213,38 +211,48 @@ namespace ProbitymmAPI.Data
             return rv;
         }
 
-        public ReturnValues ShopKeeperAcceptApproveSendToShop(AdminApprove adap)
+        public List<ProductRawMaterial> GetProductsRawMaterial(int proid,int busId)
         {
-            ReturnValues rv = new ReturnValues();
+            List<ProductRawMaterial> prl = new List<ProductRawMaterial>();
             using (SqlConnection conn = connect.getConnection())
             {
-                using (SqlCommand cmd = new SqlCommand("ShopKeeperAcceptsFinishProductToShop", conn))//call Stored Procedure
+                using (SqlCommand cmd = new SqlCommand("getRawMaterialByProductId", conn))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@UserId", adap.UserId);
-                    cmd.Parameters.AddWithValue("@BusinessId", adap.BusinessId);
-                    cmd.Parameters.AddWithValue("@ItemApprovalId", adap.ItemApprovalId);
-                    cmd.Parameters.Add("@returnvalue", SqlDbType.Int);
-                    cmd.Parameters["@returnvalue"].Direction = ParameterDirection.Output;
-                    cmd.Parameters.Add("@returnvalueString", System.Data.SqlDbType.VarChar, 100);
-                    cmd.Parameters["@returnvalueString"].Direction = ParameterDirection.Output;
+                    cmd.Parameters.AddWithValue("@productId", proid);
                     try
                     {
-                        cmd.ExecuteNonQuery();
-                        rv.StatusCode = Convert.ToInt32(cmd.Parameters["@returnvalue"].Value);
-                        rv.StatusMessage = Convert.ToString(cmd.Parameters["@returnvalueString"].Value);
+                        ProductRawMaterial _prl = new ProductRawMaterial();
+                        SqlDataReader reader = cmd.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                _prl = new ProductRawMaterial
+                                {
+                                    productId = proid,
+                                    businessId = busId,
+                                    rawMaterialID = Convert.ToInt32(reader["rawMaterialID"]),
+                                    rawMaterialName = reader["MaterialName"] is DBNull ? null : (String)reader["MaterialName"],
+                                    rawMaterialQty = Convert.ToDecimal(reader["rawMaterialQty"]),                            
+                                };
+
+                                prl.Add(_prl);
+                            }
+                        }
+                        else
+                        {
+                            prl = null;
+                        }
+
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine("We are catching an exception");
                         CommonUtilityClass.ExceptionLog(ex);
-                        Console.WriteLine(ex.Message);
-                        rv.StatusCode = 2000;
-                        rv.StatusMessage = "An Error Occured";
                     }
                 }
             }
-            return rv;
+            return prl;
         }
 
         public List<productsList> GetProductsLists(int BusinessId)
@@ -268,10 +276,12 @@ namespace ProbitymmAPI.Data
                                 {
                                     ProductId = Convert.ToInt32(reader["id"]),
                                     ProductName = reader["ProductName"] is DBNull ? null : (String)reader["ProductName"],
+                                    Code = reader["Code"] is DBNull ? null : (String)reader["Code"],
                                     SellingPercentage = Convert.ToDecimal(reader["SellingPercentage"]),
                                     Qty = Convert.ToDecimal(reader["Qty"]),
                                     CostOfRawMaterial = Convert.ToDecimal(reader["CostOfRawMaterial"]),
-                                    LastSellingPrice = Convert.ToDecimal(reader["LastSellingPrice"])   
+                                    LastSellingPrice = Convert.ToDecimal(reader["LastSellingPrice"]),
+                                    ProductRawMaterials = GetProductsRawMaterial(Convert.ToInt32(reader["id"]),BusinessId)
                                 };
 
                                 prl.Add(_prl);

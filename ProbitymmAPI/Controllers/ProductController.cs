@@ -10,7 +10,7 @@ using System.Web.Http;
 
 namespace ProbitymmAPI.Controllers
 {
-    [AuthorizeUserAttribute]
+   
     public class ProductController : BaseController
     {
         CommonUtilityClass cuc = new CommonUtilityClass();
@@ -103,32 +103,7 @@ namespace ProbitymmAPI.Controllers
             
         }
 
-        [HttpPost]
-        public IHttpActionResult ShopKeeperAcceptsFinishProductToShop([FromBody] AdminApprove adap)
-        {
-            var result = (Object)null;
-            var ReturnedData = (Object)null;
-            if (VerifyUserBusinessID(adap.BusinessId, adap.UserId))
-            {
-                if (adap.BusinessId > 0 && adap.UserId > 0 && adap.ItemApprovalId > 0)
-                {
-                    rv = pr.ShopKeeperAcceptApproveSendToShop(adap);
-                    result = cuc.GetJsonObject(ReturnedData, rv);
-                }
-                else
-                {
-                    rv.StatusCode = 10; rv.StatusMessage = "you did not supply a vital identity";
-                    result = cuc.GetJsonObject(ReturnedData, rv);
-                }
-            }
-            else
-            {
-                result = cuc.Error(3);
-            }
-            return Ok(result);
-
-        }
-
+      
         [HttpGet]
         public IHttpActionResult GetAllProducts()
         {

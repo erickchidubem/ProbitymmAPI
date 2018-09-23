@@ -16,7 +16,8 @@ namespace ProbitymmAPI.Models
         public int BusinessId { get; set; }
         public string StoreName { get; set; }
         public int UserId { get; set; }
-        public DateTime Createddate { get; set; }
+        public string CreatedBy { get; set; }
+        public DateTime ? Createddate { get; set; }
     }
 
     public class CustomerInfo

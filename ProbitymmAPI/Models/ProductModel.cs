@@ -39,6 +39,8 @@ namespace ProbitymmAPI.Models
         public decimal SellingPercentage { get; set; }
         public decimal CostOfRawMaterial { get; set; }
         public decimal LastSellingPrice { get; set; }
+        public string Code { get; set; }
+        public List<ProductRawMaterial> ProductRawMaterials { get; set; }
     }
 
     public class ProductRawMaterial
@@ -46,6 +48,7 @@ namespace ProbitymmAPI.Models
         public int businessId { get; set; }
         public int productId { get; set; }
         public int rawMaterialID { get; set; }
+        public string rawMaterialName { get; set; }
         public decimal rawMaterialQty { get; set; }
     }
 
